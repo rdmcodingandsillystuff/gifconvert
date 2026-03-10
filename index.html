@@ -3,85 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexGif | Professional Video Converter</title>
+    <title>NexGif | Ultra-Pro Converter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/coi-serviceworker/0.1.7/coi-serviceworker.min.js"></script>
     <style>
-        :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; scroll-behavior: smooth; }
+        :root { --primary: #ff00ff; --bg: #050505; --card: #111; }
+        body { font-family: 'Comic Sans MS', sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; transition: 0.3s; }
         
-        /* Layout */
-        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
-        .container { background: var(--card); padding: 2.5rem; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 100%; max-width: 500px; border: 1px solid rgba(255,255,255,0.1); }
-        
-        /* Drop Zone */
-        #drop-zone { border: 2px dashed #475569; border-radius: 16px; padding: 40px 20px; transition: 0.3s; cursor: pointer; margin-bottom: 20px; background: rgba(255,255,255,0.03); }
-        #drop-zone.hover { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); transform: translateY(-2px); }
-        
-        /* Controls */
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; display: none; }
-        .input-group { text-align: left; }
-        label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-        input[type="number"] { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 8px; border-radius: 6px; box-sizing: border-box; }
-        
-        /* Progress & Buttons */
-        #progress-container { display: none; height: 6px; background: #334155; border-radius: 10px; overflow: hidden; margin: 15px 0; }
-        #progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.2s; }
-        .btn:hover { filter: brightness(1.1); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* THE GIANT OVERLAY */
+        #drop-zone {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100; pointer-events: none; border: 0px solid var(--primary);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(0,0,0,0);
+        }
 
-        /* Description Section */
-        .description { max-width: 800px; margin: 100px auto; padding: 40px 20px; line-height: 1.6; }
-        .description h2 { color: var(--primary); font-size: 2rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; text-align: left; }
+        /* WHEN HOVERING - IT SWALLOWS THE PAGE */
+        body.drag-active #drop-zone {
+            pointer-events: all;
+            background: rgba(255, 0, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 20px solid var(--primary);
+            box-shadow: inset 0 0 100px var(--primary);
+        }
+
+        .main-content { padding: 50px; text-align: center; position: relative; z-index: 1; }
+        .glass-card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid #333; max-width: 600px; margin: 0 auto; }
+        
+        video { width: 100%; border-radius: 15px; margin-top: 15px; display: none; border: 2px solid #333; }
+        
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; display: none; }
+        input { background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; }
+        
+        #progress-container { width: 100%; height: 20px; background: #222; border-radius: 50px; display: none; margin: 20px 0; overflow: hidden; border: 2px solid #ff00ff; }
+        #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ff00ff, #00ffff); transition: 0.2s; }
+        
+        .btn { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.2rem; box-shadow: 0 0 20px var(--primary); }
+        .btn:hover { transform: scale(1.1) rotate(-2deg); }
+
+        .about-section { margin-top: 500px; padding: 100px; background: #000; border-top: 5px solid var(--primary); }
     </style>
 </head>
-<body>
+<body id="body">
 
-<section class="hero">
-    <div class="container">
-        <h1 style="margin-top:0">NexGif</h1>
-        <p style="color: #94a3b8; margin-bottom: 2rem;">Studio-quality GIF conversion in your browser.</p>
+<div id="drop-zone">
+    <h1 id="drop-text" style="font-size: 3rem; text-shadow: 0 0 20px #ff00ff;">FEED ME A VIDEO</h1>
+</div>
+
+<div class="main-content">
+    <div class="glass-card">
+        <h1>✨ NexGif Pro ✨</h1>
+        <p>Your 26s clip is safe with us. We don't steal your data, we just eat your RAM.</p>
         
-        <div id="drop-zone">
-            <p id="drop-text">Drop video file here</p>
-            <input type="file" id="file-input" style="display: none;">
-        </div>
-
+        <video id="preview" controls></video>
+        
         <div class="controls" id="controls">
-            <div class="input-group">
-                <label>Start (sec)</label>
-                <input type="number" id="start-time" value="0">
-            </div>
-            <div class="input-group">
-                <label>Duration (sec)</label>
-                <input type="number" id="duration" value="5">
-            </div>
+            <div><label>Start Sec</label><br><input type="number" id="start" value="0"></div>
+            <div><label>Duration</label><br><input type="number" id="dur" value="26"></div>
         </div>
 
         <div id="progress-container"><div id="progress-bar"></div></div>
-        <p id="status" style="font-size: 0.85rem; color: #94a3b8;"></p>
-        
-        <button id="convert-btn" class="btn" style="display:none">Generate GIF</button>
-        <div id="result-area"></div>
-    </div>
-    <p style="margin-top: 40px; color: #475569;">Scroll down to learn more ↓</p>
-</section>
+        <p id="status"></p>
 
-<section class="description">
-    <h2>Privacy-First Conversion</h2>
-    <p>NexGif is a professional-grade utility designed for speed and security. Unlike other converters, your files <strong>never leave your computer</strong>.</p>
-    
-    <div class="grid">
-        <div>
-            <h3>Native Processing</h3>
-            <p>Utilizing WebAssembly and FFmpeg, we run a full video engine directly in your browser's memory. This means zero server latency and total privacy.</p>
-        </div>
-        <div>
-            <h3>Universal Support</h3>
-            <p>Whether it's an MP4, MOV, AVI, or even high-end MKV files, our engine handles the heavy lifting without requiring external plugins.</p>
-        </div>
+        <button id="convert-btn" class="btn" style="display:none">MAKE IT A GIF!</button>
+        <div id="result"></div>
     </div>
+</div>
+
+<section class="about-section">
+    <h2>Why use this silly tool?</h2>
+    <p>1. <strong>Local Power:</strong> Your 4MB video stays on your machine. No cloud, no FBI, just vibes.</p>
+    <p>2. <strong>WASM Magic:</strong> We are running a literal computer inside your browser tab.</p>
+    <p>3. <strong>26-Second Mastery:</strong> Most sites cut you off at 10s. We don't. We believe in you.</p>
 </section>
 
 <script type="module">
@@ -89,64 +82,65 @@
     import { fetchFile } from 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js';
 
     const ffmpeg = new FFmpeg();
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
+    const body = document.getElementById('body');
+    const preview = document.getElementById('preview');
     const convertBtn = document.getElementById('convert-btn');
-    const controls = document.getElementById('controls');
-    const status = document.getElementById('status');
     let selectedFile = null;
 
-    // Drag and Drop Logic
-    dropZone.onclick = () => fileInput.click();
-    ['dragenter', 'dragover'].forEach(n => dropZone.addEventListener(n, (e) => { e.preventDefault(); dropZone.classList.add('hover'); }));
-    ['dragleave', 'drop'].forEach(n => dropZone.addEventListener(n, (e) => { e.preventDefault(); dropZone.classList.remove('hover'); }));
-
-    dropZone.addEventListener('drop', e => { handleFile(e.dataTransfer.files[0]); });
-    fileInput.onchange = e => { handleFile(e.target.files[0]); };
+    // SILLY FULL-SCREEN INTERACTION
+    window.addEventListener('dragover', (e) => { e.preventDefault(); body.classList.add('drag-active'); });
+    window.addEventListener('dragleave', (e) => { if(e.pageX === 0) body.classList.remove('drag-active'); });
+    
+    window.addEventListener('drop', (e) => {
+        e.preventDefault();
+        body.classList.remove('drag-active');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    });
 
     function handleFile(file) {
-        if (!file) return;
         selectedFile = file;
-        document.getElementById('drop-text').innerText = file.name;
-        convertBtn.style.display = 'block';
-        controls.style.display = 'grid';
-        status.innerText = "Ready to process.";
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        convertBtn.style.display = 'inline-block';
+        document.getElementById('controls').style.display = 'grid';
+        document.getElementById('status').innerText = "File loaded. Ready for chaos.";
     }
 
     convertBtn.onclick = async () => {
-        const start = document.getElementById('start-time').value;
-        const duration = document.getElementById('duration').value;
-        const progressBar = document.getElementById('progress-bar');
-        
-        convertBtn.disabled = true;
         document.getElementById('progress-container').style.display = 'block';
+        convertBtn.disabled = true;
         
-        if (!ffmpeg.loaded) await ffmpeg.load();
+        if (!ffmpeg.loaded) {
+            document.getElementById('status').innerText = "Downloading the engine (one-time thing)...";
+            await ffmpeg.load();
+        }
 
         ffmpeg.on('progress', ({ progress }) => {
-            progressBar.style.width = `${progress * 100}%`;
+            document.getElementById('progress-bar').style.width = `${progress * 100}%`;
+            document.getElementById('status').innerText = `Converting: ${Math.round(progress * 100)}%`;
         });
 
-        const ext = selectedFile.name.split('.').pop();
         await ffmpeg.writeFile('input', await fetchFile(selectedFile));
         
-        status.innerText = "Encoding GIF...";
+        // This command is optimized for 26s/4MB videos
         await ffmpeg.exec([
-            '-ss', start.toString(),
-            '-t', duration.toString(),
+            '-ss', document.getElementById('start').value,
+            '-t', document.getElementById('dur').value,
             '-i', 'input',
-            '-vf', 'fps=10,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
+            '-vf', 'fps=10,scale=400:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
             'output.gif'
         ]);
 
         const data = await ffmpeg.readFile('output.gif');
         const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
         
-        document.getElementById('result-area').innerHTML = `
-            <img src="${url}" style="width:100%; border-radius:12px; margin-top:20px;">
-            <a href="${url}" download="nexgif.gif" class="btn" style="display:block; text-decoration:none; margin-top:10px; background:#10b981">Download GIF</a>
+        document.getElementById('result').innerHTML = `
+            <h2 style="color:#00ffff">VOILÀ!</h2>
+            <img src="${url}" style="width:100%; border:5px solid #ff00ff; border-radius:20px;">
+            <br><a href="${url}" download="silly.gif" class="btn" style="display:block; margin-top:10px;">SAVE TO COMPUTER</a>
         `;
-        status.innerText = "Complete!";
+        document.getElementById('status').innerText = "Done!";
         convertBtn.disabled = false;
     };
 </script>
