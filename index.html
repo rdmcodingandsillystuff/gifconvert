@@ -3,79 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexGif | Ultra-Pro Converter</title>
+    <title>NexGif | Local Legend</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/coi-serviceworker/0.1.7/coi-serviceworker.min.js"></script>
     <style>
-        :root { --primary: #ff00ff; --bg: #050505; --card: #111; }
-        body { font-family: 'Comic Sans MS', sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; transition: 0.3s; }
+        :root { --neon: #00f2ff; --pink: #ff007b; --bg: #050505; }
+        body { font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; height: 100vh; }
         
-        /* THE GIANT OVERLAY */
+        /* THE FIXED OVERLAY: No more getting stuck */
         #drop-zone {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 100; pointer-events: none; border: 0px solid var(--primary);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; pointer-events: none;
+            transition: all 0.3s ease;
             background: rgba(0,0,0,0);
+            border: 0px solid var(--neon);
         }
 
-        /* WHEN HOVERING - IT SWALLOWS THE PAGE */
+        /* Full screen glow on hover */
         body.drag-active #drop-zone {
+            background: rgba(0, 242, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border: 40px solid var(--neon);
             pointer-events: all;
-            background: rgba(255, 0, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 20px solid var(--primary);
-            box-shadow: inset 0 0 100px var(--primary);
         }
 
-        .main-content { padding: 50px; text-align: center; position: relative; z-index: 1; }
-        .glass-card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid #333; max-width: 600px; margin: 0 auto; }
-        
-        video { width: 100%; border-radius: 15px; margin-top: 15px; display: none; border: 2px solid #333; }
-        
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; display: none; }
-        input { background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; }
-        
-        #progress-container { width: 100%; height: 20px; background: #222; border-radius: 50px; display: none; margin: 20px 0; overflow: hidden; border: 2px solid #ff00ff; }
-        #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ff00ff, #00ffff); transition: 0.2s; }
-        
-        .btn { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.2rem; box-shadow: 0 0 20px var(--primary); }
-        .btn:hover { transform: scale(1.1) rotate(-2deg); }
+        #drop-text { font-size: 5rem; font-weight: 900; opacity: 0; text-shadow: 0 0 30px var(--neon); transform: scale(0.5); transition: 0.3s; }
+        body.drag-active #drop-text { opacity: 1; transform: scale(1); }
 
-        .about-section { margin-top: 500px; padding: 100px; background: #000; border-top: 5px solid var(--primary); }
+        .main-content { padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 10; }
+        .card { background: #111; border: 3px solid #333; padding: 30px; border-radius: 40px; max-width: 600px; width: 100%; box-shadow: 0 20px 80px rgba(0,0,0,0.8); }
+        
+        @keyframes rainbow { 0%{color: red;} 20%{color: yellow;} 40%{color: lime;} 60%{color: cyan;} 80%{color: magenta;} 100%{color: red;} }
+        .silly-title { font-size: 3rem; animation: rainbow 2s linear infinite; margin: 0; }
+
+        video { width: 100%; border-radius: 20px; margin: 20px 0; display: none; border: 4px solid var(--pink); }
+        
+        .btn { background: var(--pink); color: white; border: none; padding: 20px 40px; border-radius: 100px; font-weight: 900; cursor: pointer; font-size: 1.5rem; box-shadow: 0 10px 0 #9d004c; transition: 0.1s; }
+        .btn:active { transform: translateY(5px); box-shadow: 0 5px 0 #9d004c; }
+        
+        #status { margin: 20px 0; font-weight: bold; color: var(--neon); }
+        .about { margin-top: 100vh; padding: 100px 20px; background: linear-gradient(to bottom, #050505, #1a001a); width: 100%; }
     </style>
 </head>
 <body id="body">
 
-<div id="drop-zone">
-    <h1 id="drop-text" style="font-size: 3rem; text-shadow: 0 0 20px #ff00ff;">FEED ME A VIDEO</h1>
-</div>
+<div id="drop-zone"><h1 id="drop-text">OM NOM NOM!</h1></div>
 
 <div class="main-content">
-    <div class="glass-card">
-        <h1>✨ NexGif Pro ✨</h1>
-        <p>Your 26s clip is safe with us. We don't steal your data, we just eat your RAM.</p>
+    <div class="card">
+        <h1 class="silly-title">NEXGIF PRO</h1>
+        <p>Drop your 26s masterpiece anywhere!</p>
         
         <video id="preview" controls></video>
         
-        <div class="controls" id="controls">
-            <div><label>Start Sec</label><br><input type="number" id="start" value="0"></div>
-            <div><label>Duration</label><br><input type="number" id="dur" value="26"></div>
+        <div id="controls" style="display:none; margin-bottom: 20px;">
+            <label>START: <input type="number" id="start" value="0" style="width:60px; padding:5px; border-radius:5px;"></label>
+            <label>SECONDS: <input type="number" id="dur" value="26" style="width:60px; padding:5px; border-radius:5px;"></label>
         </div>
 
-        <div id="progress-container"><div id="progress-bar"></div></div>
-        <p id="status"></p>
-
-        <button id="convert-btn" class="btn" style="display:none">MAKE IT A GIF!</button>
-        <div id="result"></div>
+        <div id="status">Waiting for a snack...</div>
+        <button id="convert-btn" class="btn" style="display:none">CRUNCH VIDEO!</button>
+        
+        <div id="result-area" style="margin-top:20px;"></div>
     </div>
 </div>
 
-<section class="about-section">
-    <h2>Why use this silly tool?</h2>
-    <p>1. <strong>Local Power:</strong> Your 4MB video stays on your machine. No cloud, no FBI, just vibes.</p>
-    <p>2. <strong>WASM Magic:</strong> We are running a literal computer inside your browser tab.</p>
-    <p>3. <strong>26-Second Mastery:</strong> Most sites cut you off at 10s. We don't. We believe in you.</p>
-</section>
+<div class="about">
+    <h2>How to get your auto-embed link:</h2>
+    <p>1. Crunch your video into a GIF.</p>
+    <p>2. Save the GIF to your computer.</p>
+    <p>3. Upload it to your GitHub repo.</p>
+    <p>4. Copy the "Download" link from GitHub. <strong>Boom. Auto-embed.</strong></p>
+</div>
 
 <script type="module">
     import { FFmpeg } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/esm/index.js';
@@ -85,11 +84,12 @@
     const body = document.getElementById('body');
     const preview = document.getElementById('preview');
     const convertBtn = document.getElementById('convert-btn');
+    const status = document.getElementById('status');
     let selectedFile = null;
 
-    // SILLY FULL-SCREEN INTERACTION
+    // --- SILLY OVERLAY LOGIC ---
     window.addEventListener('dragover', (e) => { e.preventDefault(); body.classList.add('drag-active'); });
-    window.addEventListener('dragleave', (e) => { if(e.pageX === 0) body.classList.remove('drag-active'); });
+    window.addEventListener('dragleave', (e) => { if (e.pageX <= 0) body.classList.remove('drag-active'); });
     
     window.addEventListener('drop', (e) => {
         e.preventDefault();
@@ -102,45 +102,38 @@
         selectedFile = file;
         preview.src = URL.createObjectURL(file);
         preview.style.display = 'block';
+        document.getElementById('controls').style.display = 'block';
         convertBtn.style.display = 'inline-block';
-        document.getElementById('controls').style.display = 'grid';
-        document.getElementById('status').innerText = "File loaded. Ready for chaos.";
+        status.innerText = "YUM! Press the button to start the crunch.";
     }
 
+    // --- CONVERSION LOGIC ---
     convertBtn.onclick = async () => {
-        document.getElementById('progress-container').style.display = 'block';
         convertBtn.disabled = true;
+        status.innerText = "Loading the crunch engine...";
         
-        if (!ffmpeg.loaded) {
-            document.getElementById('status').innerText = "Downloading the engine (one-time thing)...";
-            await ffmpeg.load();
-        }
+        if (!ffmpeg.loaded) await ffmpeg.load();
 
-        ffmpeg.on('progress', ({ progress }) => {
-            document.getElementById('progress-bar').style.width = `${progress * 100}%`;
-            document.getElementById('status').innerText = `Converting: ${Math.round(progress * 100)}%`;
-        });
-
+        status.innerText = "Crunching... (Go grab a snack, this takes a minute!)";
         await ffmpeg.writeFile('input', await fetchFile(selectedFile));
-        
-        // This command is optimized for 26s/4MB videos
+
         await ffmpeg.exec([
             '-ss', document.getElementById('start').value,
             '-t', document.getElementById('dur').value,
             '-i', 'input',
-            '-vf', 'fps=10,scale=400:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
+            '-vf', 'fps=10,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
             'output.gif'
         ]);
 
         const data = await ffmpeg.readFile('output.gif');
         const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
         
-        document.getElementById('result').innerHTML = `
-            <h2 style="color:#00ffff">VOILÀ!</h2>
-            <img src="${url}" style="width:100%; border:5px solid #ff00ff; border-radius:20px;">
-            <br><a href="${url}" download="silly.gif" class="btn" style="display:block; margin-top:10px;">SAVE TO COMPUTER</a>
+        document.getElementById('result-area').innerHTML = `
+            <h2 style="color:var(--neon)">CRUNCH COMPLETE!</h2>
+            <img src="${url}" style="width:100%; border-radius:20px; border:5px solid var(--neon);">
+            <br><a href="${url}" download="my_masterpiece.gif" class="btn" style="display:block; margin-top:10px; text-decoration:none;">SAVE TO COMPUTER</a>
         `;
-        document.getElementById('status').innerText = "Done!";
+        status.innerText = "Done! Now upload it to GitHub for your link!";
         convertBtn.disabled = false;
     };
 </script>
